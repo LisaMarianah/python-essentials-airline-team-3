@@ -165,14 +165,102 @@ def seat_counts(flights, flight_id):
 
 
 # Workstream B - People & Bookings
-
-
+# Registers a new passenger with a unique passenger ID.
 def register_passenger():
-    
+    global next_passenger_number
+
+    name = input("Enter passenger names: ").strip()
+
+    if name == "":
+        print("Passenger name cannot be blank.")
+        return
+
+    passenger_id = "P" + str(next_passenger_number)
+
+    passengers[passenger_id] = {
+        "name": name
+    }
+
+    next_passenger_number = next_passenger_number + 1
+
+    print("Registered", passenger_id + ":", name)
 
 
+# Workstream B - People & Bookings
+# Books a passenger into an available seat on a flight.
 def book_seat():
-    
+    global next_booking_number
+
+    passenger_id = input("Passenger ID: ").strip()
+
+    if passenger_id not in passengers:
+        print("No such passenger.")
+        return
+
+    flight_id = input("Flight ID: ").strip()
+
+    if flight_id not in flights:
+        print("No such flight.")
+        return
+
+    taken, total = seat_counts(flights, flight_id)
+
+    if taken == total:
+        answer = input(
+            "Flight " + flight_id +
+            " is FULL. Add " + passenger_id +
+            " to the waitlist? (y/n): "
+        ).strip().lower()
+
+        if answer == "y":
+            join_waitlist(flights, flight_id, passenger_id)
+        return
+
+    seat_label = input("Seat: ").strip().upper()
+
+    row_index, column_index = seat_label_to_indexes(seat_label)
+
+    if row_index is None:
+        print("Invalid seat format.")
+        return
+
+    seats = flights[flight_id]["seats"]
+
+    if row_index >= len(seats) or column_index >= len(seats[0]):
+        print("Seat does not exist on this flight.")
+        return
+
+    if seats[row_index][column_index] == "X":
+        print("Seat is already taken.")
+        return
+
+    for booking in bookings.values():
+        if (
+            booking["passenger"] == passenger_id
+            and booking["flight"] == flight_id
+        ):
+            print("Passenger is already booked on this flight.")
+            return
+
+    seats[row_index][column_index] = "X"
+
+    booking_id = "BK" + str(next_booking_number)
+
+    bookings[booking_id] = {
+        "passenger": passenger_id,
+        "flight": flight_id,
+        "seat": seat_label
+    }
+
+    next_booking_number = next_booking_number + 1
+
+    print(
+        "Booked", booking_id + ":",
+        passenger_id,
+        "on", flight_id,
+        "seat", seat_label,
+        "| R" + format(flights[flight_id]["price"], ".2f")
+    )
 
 
 def cancel_booking():
