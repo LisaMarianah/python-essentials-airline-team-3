@@ -2,6 +2,17 @@
 # Airline Reservation System
 
 
+# Starting data
+flights = {}
+passengers = {}
+bookings = {}
+
+# ID counters
+next_flight_number = 1
+next_passenger_number = 1
+next_booking_number = 1
+
+
 # Workstream A - Flights & Seats
 #Adds a new flight with a validated seat map.
 def add_flight(flights):
@@ -72,7 +83,6 @@ def add_flight(flights):
     )
 
 
-# Workstream A - Flights & Seats
 # Converts a seat label such as 2C into row and column indexes.
 def seat_label_to_indexes(seat_label):
     seat_label = seat_label.strip().upper()
@@ -98,7 +108,6 @@ def seat_label_to_indexes(seat_label):
     return row_index, column_index
 
 
-# Workstream A - Flights & Seats
 # Displays a flight's seat map and occupancy.
 def render_seat_map(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -147,7 +156,6 @@ def render_seat_map(flights, flight_id):
     )
 
 
-# Workstream A - Flights & Seats
 # Counts the taken and total seats for a flight.
 def seat_counts(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -186,7 +194,6 @@ def register_passenger():
     print("Registered", passenger_id + ":", name)
 
 
-# Workstream B - People & Bookings
 # Books a passenger into an available seat on a flight.
 def book_seat():
     global next_booking_number
@@ -261,6 +268,7 @@ def book_seat():
         "seat", seat_label,
         "| R" + format(flights[flight_id]["price"], ".2f")
     )
+
 
 # Cancels an existing booking and frees the passenger's seat.
 def cancel_booking():
@@ -469,14 +477,70 @@ def revenue_report():
     print("Total revenue: R" + format(total_revenue, ".2f"))
     
 
-
-
 # Main Menu
-
-
 def main():
-    
+    while True:
+        print()
+        print(" SKYLINK RESERVATIONS ")
+        print("1. Add Flight")
+        print("2. Display Seat Map")
+        print("3. Register Passenger")
+        print("4. Book Seat")
+        print("5. Cancel Booking")
+        print("6. Change Seat")
+        print("7. Join Waitlist")
+        print("8. Flight Manifest")
+        print("9. Revenue Report")
+        print("0. Exit")
 
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_flight(flights)
+
+        elif choice == "2":
+            flight_id = input("Flight ID: ").strip().upper()
+
+            if flight_id in flights:
+                render_seat_map(flights, flight_id)
+            else:
+                print("No such flight.")
+
+        elif choice == "3":
+            register_passenger()
+
+        elif choice == "4":
+            book_seat()
+
+        elif choice == "5":
+            cancel_booking()
+
+        elif choice == "6":
+            change_seat()
+
+        elif choice == "7":
+            flight_id = input("Flight ID: ").strip().upper()
+            passenger_id = input("Passenger ID: ").strip().upper()
+
+            if flight_id not in flights:
+                print("No such flight.")
+            elif passenger_id not in passengers:
+                print("No such passenger.")
+            else:
+                join_waitlist(flights, flight_id, passenger_id)
+
+        elif choice == "8":
+            flight_manifest()
+
+        elif choice == "9":
+            revenue_report()
+
+        elif choice == "0":
+            print("Thank you for using Skylink Reservations.")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
     main()
