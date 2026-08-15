@@ -2,6 +2,17 @@
 # Airline Reservation System
 
 
+# Starting data
+flights = {}
+passengers = {}
+bookings = {}
+
+# ID counters
+next_flight_number = 1
+next_passenger_number = 1
+next_booking_number = 1
+
+
 # Workstream A - Flights & Seats
 #Adds a new flight with a validated seat map.
 def add_flight(flights):
@@ -72,7 +83,6 @@ def add_flight(flights):
     )
 
 
-# Workstream A - Flights & Seats
 # Converts a seat label such as 2C into row and column indexes.
 def seat_label_to_indexes(seat_label):
     seat_label = seat_label.strip().upper()
@@ -98,7 +108,6 @@ def seat_label_to_indexes(seat_label):
     return row_index, column_index
 
 
-# Workstream A - Flights & Seats
 # Displays a flight's seat map and occupancy.
 def render_seat_map(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -147,7 +156,6 @@ def render_seat_map(flights, flight_id):
     )
 
 
-# Workstream A - Flights & Seats
 # Counts the taken and total seats for a flight.
 def seat_counts(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -186,7 +194,6 @@ def register_passenger():
     print("Registered", passenger_id + ":", name)
 
 
-# Workstream B - People & Bookings
 # Books a passenger into an available seat on a flight.
 def book_seat():
     global next_booking_number
@@ -263,41 +270,277 @@ def book_seat():
     )
 
 
+# Cancels an existing booking and frees the passenger's seat.
 def cancel_booking():
-    
+    booking_id = input("Booking ID: ").strip().upper()
+
+    if booking_id not in bookings:
+        print("No such booking.")
+        return
+
+    booking = bookings[booking_id]
+
+    passenger_id = booking["passenger"]
+    flight_id = booking["flight"]
+    seat_label = booking["seat"]
+
+    row_index, column_index = seat_label_to_indexes(seat_label)
+
+    flights[flight_id]["seats"][row_index][column_index] = " "
+
+    del bookings[booking_id]
+
+    print(
+        "Cancelled", booking_id + ":",
+        passenger_id,
+        "on", flight_id,
+        "seat", seat_label
+    )
+
+    promote_from_waitlist(flights, flight_id)
 
 
+# Changes a passenger's seat on a flight.
 def change_seat():
+    booking_id = input("Booking ID: ").strip().upper()
+
+    if booking_id not in bookings:
+        print("No such booking.")
+        return
+
+    booking = bookings[booking_id]
+
+    flight_id = booking["flight"]
+    old_seat = booking["seat"]
+
+    new_seat = input("New seat: ").strip().upper()
+
+    row_index, column_index = seat_label_to_indexes(new_seat)
+
+    if row_index is None:
+        print("Invalid seat format.")
+        return
+
+    seats = flights[flight_id]["seats"]
+
+    if row_index >= len(seats) or column_index >= len(seats[0]):
+        print("Seat does not exist on this flight.")
+        return
+
+    if seats[row_index][column_index] == "X":
+        print("Seat is already taken.")
+        return
+
+    old_row, old_column = seat_label_to_indexes(old_seat)
+
+    seats[old_row][old_column] = " "
+    seats[row_index][column_index] = "X"
+
+    booking["seat"] = new_seat
+
+    print(
+        "Changed", booking_id,
+        "from", old_seat,
+        "to", new_seat
+    )
     
-
-
 
 # Workstream C - Waitlist & Reports
+# Adds a passenger to a flight's waitlist
+
+def join_waitlist(flights, flight_id, passenger_id):
+    waitlist = flights[flight_id]["waitlist"]
+
+    if passenger_id in waitlist:
+        print("Passenger is already on the waitlist.")
+        return
+
+    for booking in bookings.values():
+        if (
+            booking["passenger"] == passenger_id
+            and booking["flight"] == flight_id
+        ):
+            print("Passenger is already booked on this flight.")
+            return
+
+    waitlist.append(passenger_id)
+
+    print(
+        "Added", passenger_id,
+        "to the waitlist for", flight_id
+    )
 
 
-def join_waitlist():
-    
+# Promotes the first passenger on the waitlist when a seat becomes available.
+def promote_from_waitlist(flights, flight_id):
+    waitlist = flights[flight_id]["waitlist"]
+
+    if len(waitlist) == 0:
+        return
+
+    passenger_id = waitlist.pop(0)
+
+    seats = flights[flight_id]["seats"]
+
+    for row_index in range(len(seats)):
+        for column_index in range(len(seats[row_index])):
+            if seats[row_index][column_index] == " ":
+
+                seats[row_index][column_index] = "X"
+
+                seat_label = (
+                    str(row_index + 1) +
+                    chr(ord("A") + column_index)
+                )
+
+                global next_booking_number
+
+                booking_id = "BK" + str(next_booking_number)
+
+                bookings[booking_id] = {
+                    "passenger": passenger_id,
+                    "flight": flight_id,
+                    "seat": seat_label
+                }
+
+                next_booking_number = next_booking_number + 1
+
+                print(
+                    "Promoted", passenger_id,
+                    "from waitlist.",
+                    "Booked", booking_id + ":",
+                    "seat", seat_label
+                )
+
+                return
 
 
-def promote_from_waitlist():
-    
-
-
+# Displays all passengers booked on a flight.
 def flight_manifest():
-    
+    flight_id = input("Flight ID: ").strip().upper()
+
+    if flight_id not in flights:
+        print("No such flight.")
+        return
+
+    print()
+    print(
+        "Manifest for", flight_id + ":",
+        flights[flight_id]["origin"],
+        "->",
+        flights[flight_id]["dest"]
+    )
+
+    found = False
+
+    for booking_id, booking in bookings.items():
+        if booking["flight"] == flight_id:
+            passenger_id = booking["passenger"]
+            passenger_name = passengers[passenger_id]["name"]
+
+            print(
+                booking_id,
+                "|",
+                passenger_id,
+                "|",
+                passenger_name,
+                "| Seat:",
+                booking["seat"]
+            )
+
+            found = True
+
+    if not found:
+        print("No passengers booked on this flight.")
 
 
+# Calculates and displays total revenue from bookings.
 def revenue_report():
+    total_revenue = 0
+
+    print()
+    print("Revenue Report")
+
+    for booking_id, booking in bookings.items():
+        flight_id = booking["flight"]
+        price = flights[flight_id]["price"]
+
+        total_revenue = total_revenue + price
+
+        print(
+            booking_id,
+            "|",
+            flight_id,
+            "| R" + format(price, ".2f")
+        )
+
+    print("Total revenue: R" + format(total_revenue, ".2f"))
     
-
-
 
 # Main Menu
-
-
 def main():
-    
+    while True:
+        print()
+        print(" SKYLINK RESERVATIONS ")
+        print("1. Add Flight")
+        print("2. Display Seat Map")
+        print("3. Register Passenger")
+        print("4. Book Seat")
+        print("5. Cancel Booking")
+        print("6. Change Seat")
+        print("7. Join Waitlist")
+        print("8. Flight Manifest")
+        print("9. Revenue Report")
+        print("0. Exit")
 
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_flight(flights)
+
+        elif choice == "2":
+            flight_id = input("Flight ID: ").strip().upper()
+
+            if flight_id in flights:
+                render_seat_map(flights, flight_id)
+            else:
+                print("No such flight.")
+
+        elif choice == "3":
+            register_passenger()
+
+        elif choice == "4":
+            book_seat()
+
+        elif choice == "5":
+            cancel_booking()
+
+        elif choice == "6":
+            change_seat()
+
+        elif choice == "7":
+            flight_id = input("Flight ID: ").strip().upper()
+            passenger_id = input("Passenger ID: ").strip().upper()
+
+            if flight_id not in flights:
+                print("No such flight.")
+            elif passenger_id not in passengers:
+                print("No such passenger.")
+            else:
+                join_waitlist(flights, flight_id, passenger_id)
+
+        elif choice == "8":
+            flight_manifest()
+
+        elif choice == "9":
+            revenue_report()
+
+        elif choice == "0":
+            print("Thank you for using Skylink Reservations.")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
     main()
