@@ -262,9 +262,34 @@ def book_seat():
         "| R" + format(flights[flight_id]["price"], ".2f")
     )
 
-
+# Cancels an existing booking and frees the passenger's seat.
 def cancel_booking():
-    
+    booking_id = input("Booking ID: ").strip().upper()
+
+    if booking_id not in bookings:
+        print("No such booking.")
+        return
+
+    booking = bookings[booking_id]
+
+    passenger_id = booking["passenger"]
+    flight_id = booking["flight"]
+    seat_label = booking["seat"]
+
+    row_index, column_index = seat_label_to_indexes(seat_label)
+
+    flights[flight_id]["seats"][row_index][column_index] = " "
+
+    del bookings[booking_id]
+
+    print(
+        "Cancelled", booking_id + ":",
+        passenger_id,
+        "on", flight_id,
+        "seat", seat_label
+    )
+
+    promote_from_waitlist(flights, flight_id)
 
 
 def change_seat():
