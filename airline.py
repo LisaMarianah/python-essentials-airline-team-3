@@ -362,7 +362,8 @@ def join_waitlist(flights, flight_id, passenger_id):
         "to the waitlist for", flight_id
     )
 
-    
+
+# Promotes the first passenger on the waitlist when a seat becomes available.
 def promote_from_waitlist(flights, flight_id):
     waitlist = flights[flight_id]["waitlist"]
 
@@ -406,11 +407,66 @@ def promote_from_waitlist(flights, flight_id):
                 return
 
 
+# Displays all passengers booked on a flight.
 def flight_manifest():
-    
+    flight_id = input("Flight ID: ").strip().upper()
+
+    if flight_id not in flights:
+        print("No such flight.")
+        return
+
+    print()
+    print(
+        "Manifest for", flight_id + ":",
+        flights[flight_id]["origin"],
+        "->",
+        flights[flight_id]["dest"]
+    )
+
+    found = False
+
+    for booking_id, booking in bookings.items():
+        if booking["flight"] == flight_id:
+            passenger_id = booking["passenger"]
+            passenger_name = passengers[passenger_id]["name"]
+
+            print(
+                booking_id,
+                "|",
+                passenger_id,
+                "|",
+                passenger_name,
+                "| Seat:",
+                booking["seat"]
+            )
+
+            found = True
+
+    if not found:
+        print("No passengers booked on this flight.")
 
 
+# Calculates and displays total revenue from bookings.
 def revenue_report():
+    total_revenue = 0
+
+    print()
+    print("Revenue Report")
+
+    for booking_id, booking in bookings.items():
+        flight_id = booking["flight"]
+        price = flights[flight_id]["price"]
+
+        total_revenue = total_revenue + price
+
+        print(
+            booking_id,
+            "|",
+            flight_id,
+            "| R" + format(price, ".2f")
+        )
+
+    print("Total revenue: R" + format(total_revenue, ".2f"))
     
 
 
