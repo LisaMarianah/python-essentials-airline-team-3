@@ -292,13 +292,52 @@ def cancel_booking():
     promote_from_waitlist(flights, flight_id)
 
 
+# Changes a passenger's seat on a flight.
 def change_seat():
+    booking_id = input("Booking ID: ").strip().upper()
+
+    if booking_id not in bookings:
+        print("No such booking.")
+        return
+
+    booking = bookings[booking_id]
+
+    flight_id = booking["flight"]
+    old_seat = booking["seat"]
+
+    new_seat = input("New seat: ").strip().upper()
+
+    row_index, column_index = seat_label_to_indexes(new_seat)
+
+    if row_index is None:
+        print("Invalid seat format.")
+        return
+
+    seats = flights[flight_id]["seats"]
+
+    if row_index >= len(seats) or column_index >= len(seats[0]):
+        print("Seat does not exist on this flight.")
+        return
+
+    if seats[row_index][column_index] == "X":
+        print("Seat is already taken.")
+        return
+
+    old_row, old_column = seat_label_to_indexes(old_seat)
+
+    seats[old_row][old_column] = " "
+    seats[row_index][column_index] = "X"
+
+    booking["seat"] = new_seat
+
+    print(
+        "Changed", booking_id,
+        "from", old_seat,
+        "to", new_seat
+    )
     
 
-
-
 # Workstream C - Waitlist & Reports
-
 
 def join_waitlist():
     
