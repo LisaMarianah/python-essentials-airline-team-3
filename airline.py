@@ -338,13 +338,72 @@ def change_seat():
     
 
 # Workstream C - Waitlist & Reports
+# Adds a passenger to a flight's waitlist
 
-def join_waitlist():
+def join_waitlist(flights, flight_id, passenger_id):
+    waitlist = flights[flight_id]["waitlist"]
+
+    if passenger_id in waitlist:
+        print("Passenger is already on the waitlist.")
+        return
+
+    for booking in bookings.values():
+        if (
+            booking["passenger"] == passenger_id
+            and booking["flight"] == flight_id
+        ):
+            print("Passenger is already booked on this flight.")
+            return
+
+    waitlist.append(passenger_id)
+
+    print(
+        "Added", passenger_id,
+        "to the waitlist for", flight_id
+    )
+
     
+def promote_from_waitlist(flights, flight_id):
+    waitlist = flights[flight_id]["waitlist"]
 
+    if len(waitlist) == 0:
+        return
 
-def promote_from_waitlist():
-    
+    passenger_id = waitlist.pop(0)
+
+    seats = flights[flight_id]["seats"]
+
+    for row_index in range(len(seats)):
+        for column_index in range(len(seats[row_index])):
+            if seats[row_index][column_index] == " ":
+
+                seats[row_index][column_index] = "X"
+
+                seat_label = (
+                    str(row_index + 1) +
+                    chr(ord("A") + column_index)
+                )
+
+                global next_booking_number
+
+                booking_id = "BK" + str(next_booking_number)
+
+                bookings[booking_id] = {
+                    "passenger": passenger_id,
+                    "flight": flight_id,
+                    "seat": seat_label
+                }
+
+                next_booking_number = next_booking_number + 1
+
+                print(
+                    "Promoted", passenger_id,
+                    "from waitlist.",
+                    "Booked", booking_id + ":",
+                    "seat", seat_label
+                )
+
+                return
 
 
 def flight_manifest():
