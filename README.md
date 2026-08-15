@@ -17,7 +17,7 @@ Skylink Reservations is a Python-based airline reservation system that allows us
 - Generate a revenue report
 
 # Technologies
-- Python 3
+- Python 3/VS code
 - Github
 - Python dictionaries and lists
 
@@ -25,13 +25,13 @@ Skylink Reservations is a Python-based airline reservation system that allows us
 - Make sure Python 3 is installed.
 - Clone or download the project repository.
 - Open the project folder in your terminal.
-- Run the program using: 
+- Run the program using python 
 - Follow the menu prompts to use the reservation system.
   
 # Project Structure
-Skylink-Reservations/
+Skylink-Reservations
 
-skylink_reservations.py
+airline.py
 README.md
 
 # Contributors
