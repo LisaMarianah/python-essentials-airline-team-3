@@ -304,10 +304,13 @@ def cancel_booking():
     promote_from_waitlist(flights, flight_id)
 
 
-
 # Changes a passenger's seat on a flight.
 def change_seat():
     booking_id = input("Booking ID: ").strip().upper()
+
+    if booking_id == "":
+        print("Booking ID cannot be blank.")
+        return
 
     if booking_id not in bookings:
         print("No such booking.")
@@ -319,6 +322,10 @@ def change_seat():
     old_seat = booking["seat"]
 
     new_seat = input("New seat: ").strip().upper()
+
+    if new_seat == "":
+        print("Seat cannot be blank.")
+        return
 
     row_index, column_index = seat_label_to_indexes(new_seat)
 
@@ -343,11 +350,7 @@ def change_seat():
 
     booking["seat"] = new_seat
 
-    print(
-        "Changed", booking_id,
-        "from", old_seat,
-        "to", new_seat
-    )
+    print(booking_id + ": seat changed from", old_seat, "to", new_seat)
     
 
 # Workstream C - Waitlist & Reports
