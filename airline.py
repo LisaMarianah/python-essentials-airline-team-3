@@ -415,13 +415,11 @@ def promote_from_waitlist(flights, flight_id):
                 next_booking_number = next_booking_number + 1
 
                 print(
-                    "Promoted", passenger_id,
-                    "from waitlist.",
-                    "Booked", booking_id + ":",
-                    "seat", seat_label
+                    "WAITLIST:", passenger_id,
+                    "has been automatically booked into seat",
+                    seat_label,
+                    "(booking", booking_id + ")."
                 )
-
-                return
 
 
 # Displays all passengers booked on a flight.
