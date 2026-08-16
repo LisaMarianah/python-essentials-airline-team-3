@@ -427,6 +427,10 @@ def promote_from_waitlist(flights, flight_id):
 def flight_manifest():
     flight_id = input("Flight ID: ").strip().upper()
 
+    if flight_id == "":
+        print("Flight ID cannot be blank.")
+        return
+
     if flight_id not in flights:
         print("No such flight.")
         return
@@ -439,50 +443,112 @@ def flight_manifest():
         flights[flight_id]["dest"]
     )
 
-    found = False
+    flight_bookings = []
 
     for booking_id, booking in bookings.items():
         if booking["flight"] == flight_id:
-            passenger_id = booking["passenger"]
+            flight_bookings.append(
+                (booking["seat"], booking_id, booking["passenger"])
+            )
+
+    flight_bookings.sort()
+
+    if len(flight_bookings) == 0:
+        print("No passengers booked on this flight.")
+    else:
+        for seat, booking_id, passenger_id in flight_bookings:
             passenger_name = passengers[passenger_id]["name"]
 
             print(
                 booking_id,
                 "|",
-                passenger_id,
+                seat,
                 "|",
-                passenger_name,
-                "| Seat:",
-                booking["seat"]
+                passenger_id,
+                "-",
+                passenger_name
             )
 
-            found = True
+    waitlist = flights[flight_id]["waitlist"]
 
-    if not found:
-        print("No passengers booked on this flight.")
+    print()
+    print("Waitlist:")
+
+    if len(waitlist) == 0:
+        print("(waitlist empty)")
+    else:
+        for passenger_id in waitlist:
+            passenger_name = passengers[passenger_id]["name"]
+
+            print(
+                passenger_id,
+                "-",
+                passenger_name
+            )
+
+
+# Calculates occupancy information for a flight.
+def flight_occupancy(flights, flight_id):
+    taken, total = seat_counts(flights, flight_id)
+
+    if total == 0:
+        percentage = 0
+    else:
+        percentage = (taken / total) * 100
+
+    return taken, total, percentage
 
 
 # Calculates and displays total revenue from bookings.
 def revenue_report():
-    total_revenue = 0
-
     print()
     print("Revenue Report")
 
-    for booking_id, booking in bookings.items():
-        flight_id = booking["flight"]
-        price = flights[flight_id]["price"]
+    total_revenue = 0
+    total_waitlisted = 0
 
-        total_revenue = total_revenue + price
+    fullest_flight = None
+    highest_occupancy = -1
+
+    if len(flights) == 0:
+        print("No flights available.")
+        print("Total revenue: R0.00")
+        print("Fullest flight: None")
+        print("Total passengers on waitlists: 0")
+        return
+
+    for flight_id, flight in flights.items():
+
+        taken, total, occupancy = flight_occupancy(flights, flight_id)        
+
+        revenue = taken * flight["price"]
+
+        total_revenue = total_revenue + revenue
+        total_waitlisted = total_waitlisted + len(flight["waitlist"])
+
+        if occupancy > highest_occupancy:
+            highest_occupancy = occupancy
+            fullest_flight = flight_id
 
         print(
-            booking_id,
-            "|",
             flight_id,
-            "| R" + format(price, ".2f")
+            "|",
+            flight["origin"],
+            "->",
+            flight["dest"],
+            "|",
+            str(taken) + "/" + str(total),
+            "seats",
+            "|",
+            format(occupancy, ".1f") + "%",
+            "|",
+            "R" + format(revenue, ".2f")
         )
 
+    print()
     print("Total revenue: R" + format(total_revenue, ".2f"))
+    print("Fullest flight:", fullest_flight)
+    print("Total passengers on waitlists:", total_waitlisted)
     
 
 # Main Menu
