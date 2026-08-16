@@ -481,33 +481,35 @@ def revenue_report():
 def main():
     while True:
         print()
-        print(" SKYLINK RESERVATIONS ")
+        print("===== SKYLINK RESERVATIONS =====")
         print("1. Add Flight")
-        print("2. Display Seat Map")
-        print("3. Register Passenger")
-        print("4. Book Seat")
-        print("5. Cancel Booking")
-        print("6. Change Seat")
-        print("7. Join Waitlist")
-        print("8. Flight Manifest")
-        print("9. Revenue Report")
-        print("0. Exit")
+        print("2. Register a passenger")
+        print("3. View seat map")
+        print("4. Book a Seat")
+        print("5. Cancel a Booking")
+        print("6. Change a Seat")
+        print("7. Flight manifest")
+        print("8. Revenue report")
+        print("9. Exit")
+    
 
-        choice = input("Enter your choice: ").strip()
+        choice = input("Choose an option (1-9): ").strip()
 
         if choice == "1":
             add_flight(flights)
 
         elif choice == "2":
-            flight_id = input("Flight ID: ").strip().upper()
-
-            if flight_id in flights:
-                render_seat_map(flights, flight_id)
-            else:
-                print("No such flight.")
+            register_passenger()
 
         elif choice == "3":
-            register_passenger()
+            flight_id = input("Flight ID: ").strip().upper()
+
+            if flight_id == "":
+                print("Flight ID cannot be blank.")
+            elif flight_id not in flights:
+                print("No such flight.")
+            else:
+                render_seat_map(flights, flight_id)
 
         elif choice == "4":
             book_seat()
@@ -519,28 +521,17 @@ def main():
             change_seat()
 
         elif choice == "7":
-            flight_id = input("Flight ID: ").strip().upper()
-            passenger_id = input("Passenger ID: ").strip().upper()
-
-            if flight_id not in flights:
-                print("No such flight.")
-            elif passenger_id not in passengers:
-                print("No such passenger.")
-            else:
-                join_waitlist(flights, flight_id, passenger_id)
-
-        elif choice == "8":
             flight_manifest()
 
-        elif choice == "9":
+        elif choice == "8":
             revenue_report()
 
-        elif choice == "0":
-            print("Thank you for using Skylink Reservations.")
+        elif choice == "9":
+            print("Goodbye!")
             break
 
         else:
-            print("Invalid choice. Please try again.")
+            print("Invalid choice, please enter 1-9.")
 
 if __name__ == "__main__":
     main()
