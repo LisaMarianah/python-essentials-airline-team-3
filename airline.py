@@ -374,8 +374,9 @@ def join_waitlist(flights, flight_id, passenger_id):
     waitlist.append(passenger_id)
 
     print(
-        "Added", passenger_id,
-        "to the waitlist for", flight_id
+        passenger_id,
+        "Added to the ", flight_id,
+        "waitlist at position", len(waitlist)
     )
 
 
