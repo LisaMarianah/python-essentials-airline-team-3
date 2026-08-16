@@ -7,7 +7,7 @@ flights = {}
 passengers = {}
 bookings = {}
 
-# ID counters
+# ID counters  
 next_flight_number = 1
 next_passenger_number = 1
 next_booking_number = 1
@@ -82,7 +82,7 @@ def add_flight(flights):
         "|", str(rows), "rows x", str(seats_per_row), "seats"
     )
 
-
+# Workstream A - Flights & Seats
 # Converts a seat label such as 2C into row and column indexes.
 def seat_label_to_indexes(seat_label):
     seat_label = seat_label.strip().upper()
@@ -107,7 +107,7 @@ def seat_label_to_indexes(seat_label):
     column_index = ord(column_letter) - ord("A")
     return row_index, column_index
 
-
+# Workstream A - Flights & Seats
 # Displays a flight's seat map and occupancy.
 def render_seat_map(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -155,7 +155,7 @@ def render_seat_map(flights, flight_id):
         "(" + format(percentage, ".1f") + "% full)"
     )
 
-
+# Workstream A - Flights & Seats
 # Counts the taken and total seats for a flight.
 def seat_counts(flights, flight_id):
     seats = flights[flight_id]["seats"]
@@ -193,7 +193,7 @@ def register_passenger():
 
     print("Registered", passenger_id + ":", name)
 
-
+# Workstream B - People & Bookings
 # Books a passenger into an available seat on a flight.
 def book_seat():
     global next_booking_number
@@ -269,7 +269,7 @@ def book_seat():
         "| R" + format(flights[flight_id]["price"], ".2f")
     )
 
-
+# Workstream B - People & Bookings
 # Cancels an existing booking and frees the passenger's seat.
 def cancel_booking():
     booking_id = input("Booking ID: ").strip().upper()
@@ -303,7 +303,7 @@ def cancel_booking():
 
     promote_from_waitlist(flights, flight_id)
 
-
+# Workstream B - People & Bookings
 # Changes a passenger's seat on a flight.
 def change_seat():
     booking_id = input("Booking ID: ").strip().upper()
@@ -372,13 +372,17 @@ def join_waitlist(flights, flight_id, passenger_id):
             return
 
     waitlist.append(passenger_id)
+    
+    position = len(waitlist)
 
     print(
         "Added", passenger_id,
-        "to the waitlist for", flight_id
+        "to the waitlist for", flight_id,
+        "at position", position
+
     )
 
-
+# Workstream C - Waitlist & Reports
 # Promotes the first passenger on the waitlist when a seat becomes available.
 def promote_from_waitlist(flights, flight_id):
     waitlist = flights[flight_id]["waitlist"]
@@ -422,7 +426,7 @@ def promote_from_waitlist(flights, flight_id):
 
                 return
 
-
+# Workstream C - Waitlist & Reports
 # Displays all passengers booked on a flight.
 def flight_manifest():
     flight_id = input("Flight ID: ").strip().upper()
@@ -486,7 +490,7 @@ def flight_manifest():
                 passenger_name
             )
 
-
+# Workstream C - Waitlist & Report
 # Calculates occupancy information for a flight.
 def flight_occupancy(flights, flight_id):
     taken, total = seat_counts(flights, flight_id)
@@ -498,7 +502,25 @@ def flight_occupancy(flights, flight_id):
 
     return taken, total, percentage
 
+# Workstream C - Waitlist & Reports
+# Finds the flight with the highest occupancy.
+def find_fullest_flight(flights):
+    fullest_flight = None
+    highest_occupancy = -1
 
+    for flight_id in flights:
+        taken, total, percentage = flight_occupancy(
+            flights,
+            flight_id
+        )
+
+        if percentage > highest_occupancy:
+            highest_occupancy = percentage
+            fullest_flight = flight_id
+
+    return fullest_flight, highest_occupancy
+
+# Workstream C - Waitlist & Reports
 # Calculates and displays total revenue from bookings.
 def revenue_report():
     print()
@@ -506,16 +528,15 @@ def revenue_report():
 
     total_revenue = 0
     total_waitlisted = 0
-
-    fullest_flight = None
-    highest_occupancy = -1
-
+    
     if len(flights) == 0:
         print("No flights available.")
         print("Total revenue: R0.00")
         print("Fullest flight: None")
         print("Total passengers on waitlists: 0")
         return
+        
+    fullest_flight, _ = find_fullest_flight(flights)
 
     for flight_id, flight in flights.items():
 
@@ -525,10 +546,6 @@ def revenue_report():
 
         total_revenue = total_revenue + revenue
         total_waitlisted = total_waitlisted + len(flight["waitlist"])
-
-        if occupancy > highest_occupancy:
-            highest_occupancy = occupancy
-            fullest_flight = flight_id
 
         print(
             flight_id,
