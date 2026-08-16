@@ -274,6 +274,10 @@ def book_seat():
 def cancel_booking():
     booking_id = input("Booking ID: ").strip().upper()
 
+    if booking_id == "":
+        print("Booking ID cannot be blank.")
+        return
+
     if booking_id not in bookings:
         print("No such booking.")
         return
@@ -288,16 +292,17 @@ def cancel_booking():
 
     flights[flight_id]["seats"][row_index][column_index] = " "
 
+
     del bookings[booking_id]
 
     print(
-        "Cancelled", booking_id + ":",
-        passenger_id,
-        "on", flight_id,
-        "seat", seat_label
+        "Booking", booking_id,
+        "cancelled. Seat", seat_label,
+        "on", flight_id, "is free."
     )
 
     promote_from_waitlist(flights, flight_id)
+
 
 
 # Changes a passenger's seat on a flight.
